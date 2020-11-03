@@ -1,34 +1,60 @@
 <script lang="ts">
-    export let name: string = "world";
+    import DataList from './DataList.svelte';
+    import type { Item } from './DataList.svelte';
+    import db from '../database';
+    import { onMount } from 'svelte';
+    import { dateString } from '../date';
+
+    let exercises: Item[] = [];
+
+    async function fetchExercises() {
+        exercises = (await db.exercises.toArray()).map((exercise) => ({
+            value: exercise.id,
+            text: exercise.name,
+        }));
+        exercises.sort((a, b) => a.text.localeCompare(b.text));
+    }
+    let selectedItem: Item;
+    async function createExercise(name: string): Promise<Item> {
+        let id = await db.exercises.put({ name });
+        return { text: name, value: id };
+    }
+
+    onMount(fetchExercises);
 </script>
 
 <style lang="scss">
-    main {
-        text-align: center;
-        padding: 1em;
-        max-width: 240px;
-        margin: 0 auto;
-
-        h1 {
-            color: #ff3e00;
-            text-transform: uppercase;
-            font-size: 4em;
-            font-weight: 100;
-        }
+    :global(*) {
+        box-sizing: border-box;
+        font-family: inherit;
+        font-size: inherit;
+        color: inherit;
     }
-
-    @media (min-width: 640px) {
-        main {
-            max-width: none;
+    :global(body) {
+        margin: 0 16px;
+    }
+    :global(html) {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+            Cantarell, 'Helvetica Neue', sans-serif;
+        font-size: 16px;
+        color: #363636;
+    }
+    :global(.input) {
+        background: #fff;
+        border: 1px solid #dbdbdb;
+        border-radius: 3px;
+        outline: 0;
+        min-height: 2.5em;
+        padding: 0.5em 0.75em;
+        width: 100%;
+        &:focus {
+            border-color: #3273dc;
+            box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
         }
     }
 </style>
 
-<main>
-    <h1>Hello {name}!</h1>
-    <p>
-        Visit the
-        <a href="https://svelte.dev/tutorial">Svelte tutorial</a>
-        to learn how to build Svelte apps.
-    </p>
-</main>
+<span>Date</span>
+<input class="input" type="date" value={dateString(new Date())} />
+<span>Exercise</span>
+<DataList bind:selectedItem bind:items={exercises} create={createExercise} type="exercise" />

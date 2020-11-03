@@ -4,37 +4,45 @@ import typescript from '@rollup/plugin-typescript';
 import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
+import replace from '@rollup/plugin-replace';
 
-const production = !process.env.ROLLUP_WATCH;
+const MINIFY = !!process.env.MINIFY;
+const DEMO = !!process.env.DEMO;
 
 export default {
+    onwarn: (warning, next) => {
+        if (warning.code == 'MISSING_NAME_OPTION_FOR_IIFE_EXPORT') return;
+        next(warning);
+    },
     input: 'src/main.ts',
     output: {
-        sourcemap: !production,
+        sourcemap: !MINIFY,
         format: 'iife',
-        name: 'app',
-        file: 'public/build/bundle.js'
+        file: 'public/build/bundle.js',
     },
     plugins: [
+        replace({
+            'process.env.DEMO': DEMO,
+        }),
         svelte({
-            dev: !production,
-            css: css => {
-                css.write('bundle.css', !production);
+            dev: !MINIFY,
+            css: (css) => {
+                css.write('bundle.css', !MINIFY);
             },
-            preprocess: sveltePreprocess()
+            preprocess: sveltePreprocess(),
         }),
         resolve({
             browser: true,
-            dedupe: ['svelte']
+            dedupe: ['svelte'],
         }),
         commonjs(),
         typescript({
-            sourceMap: !production,
-            inlineSources: !production
+            sourceMap: !MINIFY,
+            inlineSources: !MINIFY,
         }),
-        production && terser()
+        MINIFY && terser(),
     ],
     watch: {
-        clearScreen: false
-    }
+        clearScreen: false,
+    },
 };
