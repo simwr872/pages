@@ -6,7 +6,7 @@
 </script>
 
 <script lang="ts">
-    import { fly, fade } from 'svelte/transition';
+    import { fade } from 'svelte/transition';
 
     export let items: Item[] = [];
     export let type = 'item';
@@ -119,6 +119,7 @@
         color: #999;
     }
     .placeholder {
+        cursor: pointer;
         background: #fff;
         border: 1px solid #dbdbdb;
         border-radius: 3px;
@@ -133,7 +134,7 @@
         }
         padding: 0.5em 0.75em;
         &.active {
-            border-bottom: none;
+            border-bottom-color: transparent;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }

@@ -1,6 +1,7 @@
 {
     "scripts": {
         "build": "rollup --config --environment MINIFY",
+        "demo": "rollup --config --environment MINIFY,DEMO",
         "dev": "rollup --config --watch --environment DEMO"
     },
     "devDependencies": {

@@ -29,7 +29,34 @@ export default {
             css: (css) => {
                 css.write('bundle.css', !MINIFY);
             },
-            preprocess: sveltePreprocess(),
+            preprocess: [
+                {
+                    markup: (opts) => {
+                        let content = opts.content;
+                        let matches = [
+                            ...content.matchAll(
+                                /<script.*?>.*?<\/script>|<style.*?>.*?<\/style>/gs
+                            ),
+                        ];
+
+                        return {
+                            code: content.replace(/(?<=>)\s+|\s+(?=<)/g, (matched, offset) => {
+                                for (let i = 0; i < matches.length; i++) {
+                                    let match = matches[i];
+                                    if (
+                                        match.index <= offset &&
+                                        offset <= match.index + match[0].length
+                                    ) {
+                                        return matched;
+                                    }
+                                }
+                                return '';
+                            }),
+                        };
+                    },
+                },
+                sveltePreprocess(),
+            ],
         }),
         resolve({
             browser: true,
