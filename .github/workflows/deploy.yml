@@ -1,7 +1,5 @@
 on:
   push:
-    branches:
-      - main
     tags:
       - v[0-9]+.[0-9]+
 
@@ -10,9 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - run: npm install
-      - run: npm run build
+      - run: yarn install
+      - run: make -j APP="--demo --minify"
+      - run: |
+          repo=$(echo "$GITHUB_REPOSITORY" | cut --delimiter / --fields 2)
+          file=public/manifest.webmanifest
+          result=$(jq -c --arg url "/$repo/index.html" '.start_url = $url' "$file")
+          echo "$result" > "$file"
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

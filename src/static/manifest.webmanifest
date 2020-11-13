@@ -1,0 +1,19 @@
+{
+    "name": "Workout Analytics",
+    "display": "standalone",
+    "background_color": "#3273dc",
+    "theme_color": "#3273dc",
+    "start_url": "/index.html",
+    "icons": [
+        {
+            "src": "./32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "./256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        }
+    ]
+}

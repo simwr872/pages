@@ -8,7 +8,8 @@
 
 <script lang="ts">
     import { flip } from 'svelte/animate';
-    import { clamp } from '../math';
+    import { fade } from 'svelte/transition';
+    import { clamp } from '../scripts/math';
     import { createEventDispatcher } from 'svelte';
 
     const dispatch = createEventDispatcher();
@@ -48,7 +49,7 @@
 
     function drop() {
         grabbedId = null;
-        dispatch("change");
+        dispatch('change');
     }
 
     function grab(y: number, id: number) {
@@ -66,7 +67,7 @@
     .items {
         background: #ddd;
         padding: 0;
-        margin: 10px 0;
+        margin: 0;
         border: 1px solid #dbdbdb;
         border-radius: 3px;
         position: relative;
@@ -111,15 +112,15 @@
     }
     .handle {
         border-right: 1px solid #dbdbdb;
-        display: inline-block;
-        height: 3em;
-        width: 1.5em;
-        background: url('../dots.svg');
-        background-size: auto 1.5em;
-        background-repeat: no-repeat;
-        background-position: center;
+        display: flex;
+        font-size: 1.5em;
+        height: 2em;
+        width: 1em;
+        font-family: icons;
         color: #dbdbdb;
         cursor: move;
+        align-items: center;
+        justify-content: center;
     }
     .grabbed {
         position: absolute;
@@ -158,7 +159,7 @@
 <svelte:window on:mousemove={(event) => drag(event.clientY)} on:mouseup={drop} />
 <ol class="items" bind:this={itemsElement}>
     {#if grabbedId != null}
-        <li class="item grabbed" style="top: {grabbedY}px">
+        <li class="item grabbed" style="top: {grabbedY}px" out:fade={{ duration: 100 }}>
             {@html grabbedHTML}
         </li>
     {/if}
@@ -184,7 +185,7 @@
                     }}
                     on:touchmove={(event) => drag(event.touches[0].clientY)}
                     on:touchend={drop}
-                    on:touchcancel={drop} />
+                    on:touchcancel={drop}>&dots;</span>
                 <div class="text"><span>{item.title}</span><span>{item.body}</span></div>
             </div>
             <button class="delete">✕</button>
