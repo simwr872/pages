@@ -3,6 +3,7 @@
         id: number;
         title: string;
         body: string;
+        value?: any;
     }
 </script>
 

@@ -1,7 +1,3 @@
-import demo from './scripts/demo';
-declare var __DEMO__: boolean;
-if (__DEMO__) demo();
-
 window.addEventListener('load', () => {
     navigator.serviceWorker.register('./worker.js').then(
         function (registration) {

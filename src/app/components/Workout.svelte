@@ -10,7 +10,7 @@
     let exercises: DataListItem[] = [];
 
     async function fetchExercises() {
-        exercises = (await db.exercises.toArray()).map((exercise) => ({
+        exercises = (await (await db).getAll('exercises')).map((exercise) => ({
             value: exercise.id,
             text: exercise.name,
         }));
@@ -18,28 +18,36 @@
     }
     let selectedItem: DataListItem;
     async function createExercise(name: string): Promise<DataListItem> {
-        let id = await db.exercises.put({ name });
+        let id = await (await db).put('exercises', { name });
         return { text: name, value: id };
     }
 
     let sets: ReorderableListItem[] = [];
     async function fetchSets(date: number) {
-        let exercises = await db.exercises.toArray();
-        let data = await db.sets.where({ date }).toArray();
+        let exercises = await (await db).getAll('exercises');
+        let data = await (await db).getAllFromIndex('sets', 'date', date);
         data.sort((a, b) => a.position - b.position);
         sets = data.map((set) => ({
             id: set.id,
             title: exercises.find((exercise) => exercise.id == set.exercise_id).name,
             body: `${set.repititions}x${set.weight} kg`,
+            value: set,
         }));
     }
 
-    function handleChange() {
-        db.transaction('rw', db.sets, () => {
+    async function handleChange() {
+        const tx = (await db).transaction('sets', 'readwrite');
+        await Promise.all(
+            sets.map((set, index) => {
+                set.value.position = index;
+                tx.store.put(set.value);
+            })
+        );
+        /*db.transaction('rw', db.sets, () => {
             sets.forEach((set, index) => {
                 db.sets.update(set.id, { position: index });
             });
-        });
+        });*/
     }
 
     let date = dateString(new Date());
@@ -80,8 +88,7 @@
 
     async function handleConfirm(event: CustomEvent) {
         let data = event.detail;
-        console.log(data);
-        await db.sets.add({
+        await (await db).add('sets', {
             date: compactDate(date),
             exercise_id: selectedItem.value,
             position: sets.length,
@@ -92,7 +99,7 @@
     }
 
     async function deleteSet(id: number) {
-        await db.sets.delete(id);
+        await (await db).delete('sets', id);
         fetchSets(compactDate(date));
     }
 </script>
