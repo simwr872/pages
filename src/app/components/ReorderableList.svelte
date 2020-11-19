@@ -14,6 +14,7 @@
 
     const dispatch = createEventDispatcher();
 
+    export let onDelete: (id: number) => any;
     export let items: Item[] = [];
 
     let grabbedId: number;
@@ -169,6 +170,7 @@
     {#each items as item (item.id)}
         <li
             animate:flip={{ duration: 100 }}
+            transition:fade={{duration: 100}}
             class="item"
             class:ghost={grabbedId == item.id}
             data-id={item.id}>
@@ -188,7 +190,7 @@
                     on:touchcancel={drop}>&dots;</span>
                 <div class="text"><span>{item.title}</span><span>{item.body}</span></div>
             </div>
-            <button class="delete">✕</button>
+            <button class="delete" on:click={() => onDelete(item.id)}>✕</button>
         </li>
     {/each}
 </ol>

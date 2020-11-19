@@ -1,0 +1,20 @@
+@use "./colors.scss";
+@use 'sass:color';
+
+@mixin focus {
+    border-color: colors.$focus;
+    box-shadow: 0 0 0 0.125em color.change(colors.$focus, $alpha: 0.25);
+}
+
+@mixin button($color) {
+    background: $color;
+    &:hover:not(:disabled):not(:active) {
+        background: color.scale($color, $lightness: -15%);
+    }
+    &:active {
+        background: color.scale($color, $lightness: -30%);
+    }
+    &:focus:not(:active) {
+        box-shadow: 0 0 0 0.125em color.change($color, $alpha: 0.25);
+    }
+}

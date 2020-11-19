@@ -120,19 +120,10 @@
     }
     .placeholder {
         cursor: pointer;
-        background: #fff;
-        border: 1px solid #dbdbdb;
-        border-radius: 3px;
-        outline: 0;
-        width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        &:focus {
-            border-color: #3273dc;
-            box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
-        }
-        padding: 0.5em 0.75em;
+        padding: 0 0.75em;
         &.active {
             border-bottom-color: transparent;
             border-bottom-left-radius: 0;
@@ -189,7 +180,7 @@
 <svelte:window on:mousedown={handleMousedown} />
 <div class="select">
     <div
-        class="placeholder"
+        class="input placeholder"
         class:faded={!selectedItem}
         class:active={isActive}
         tabindex="0"

@@ -1,58 +1,85 @@
+@use "sass:color";
+@use './colors.scss';
+@use './mixins.scss';
+
 @font-face {
-  font-family: icons;
-  src: url("./icons.woff2");
+    font-family: icons;
+    src: url('./icons.woff2');
 }
 * {
-  box-sizing: border-box;
-  font-family: inherit;
-  color: inherit;
+    box-sizing: border-box;
+    font-family: inherit;
+    color: inherit;
 }
 input {
-  font-size: inherit;
+    font-size: inherit;
 }
 body {
-  margin: 0 16px;
+    margin: 0 16px;
 }
 html {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
-    'Helvetica Neue', sans-serif;
-  font-size: 16px;
-  color: #363636;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+        Cantarell, 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+    color: colors.$dark;
 }
 .input {
-  background: #fff;
-  border: 1px solid #dbdbdb;
-  border-radius: 3px;
-  outline: 0;
-  min-height: 2.5em;
-  padding: 0.5em 0.75em;
-  width: 100%;
-  &:focus {
-    border-color: #3273dc;
-    box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
-  }
+    background: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 3px;
+    outline: 0;
+    height: 44px;
+    padding: 0.5em 0.75em;
+    width: 100%;
+    &:focus {
+        @include mixins.focus;
+    }
 }
+
+section {
+    margin: 1em 0;
+}
+.label {
+    margin-bottom: 0.5em;
+}
+
 .button {
-  padding: 0;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  background: #3273dc;
-  border-radius: 3px;
-  height: 2.5em;
-  cursor: pointer;
-  margin-top: 10px;
-  width: 100%;
-  &:hover {
-    box-shadow: inset 0 0 0 3em rgba(0, 0, 0, 0.1);
-  }
-  &:hover:focus:not(:active) {
-    box-shadow: inset 0 0 0 3em rgba(0, 0, 0, 0.1), 0 0 0 0.125em rgba(50, 115, 220, 0.25);
-  }
-  &:focus {
-    box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
-  }
-  &:active {
-    box-shadow: inset 0 0 0 3em rgba(0, 0, 0, 0.2);
-  }
+    margin: 0;
+    outline: 0;
+    border: 0;
+    border-radius: 3px;
+    height: 44px;
+    cursor: pointer;
+    padding: 0 1em;
+    font-size: inherit;
+    color: #fff;
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    &.block {
+        display: block;
+        width: 100%;
+    }
+    &.primary {
+        @include mixins.button(colors.$primary);
+    }
+    &.secondary {
+        color: colors.$dark;
+        @include mixins.button(colors.$secondary);
+    }
+    &.ghost {
+        background: #fff;
+        color: colors.$dark;
+        border: 1px solid colors.$border;
+        &:hover {
+            border-color: color.scale(colors.$border, $lightness: -15%);
+        }
+        &:active {
+            border-color: color.scale(colors.$border, $lightness: -45%);
+        }
+        &:focus:not(:active) {
+            @include mixins.focus;
+        }
+    }
 }

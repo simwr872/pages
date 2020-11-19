@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const csso = require('csso');
+const cssnano = require('cssnano');
 const program = require('commander').program;
 
 const opts = program
@@ -16,11 +16,13 @@ const opts = program
     .parse(process.argv)
     .opts();
 
-let result = '';
-opts.styles.forEach((style) => {
-    result += fs.readFileSync(style).toString();
-});
-result = csso.minify(result);
-// see https://github.com/sveltejs/svelte/issues/4374
-result = result.css.replace(/(\.[^.]+)\1+/g, '$1');
-fs.writeFileSync(`${opts.output}/${opts.name}.css`, result);
+(async () => {
+    let result = '';
+    opts.styles.forEach((style) => {
+        result += fs.readFileSync(style).toString();
+    });
+    result = await cssnano.process(result);
+    // see https://github.com/sveltejs/svelte/issues/4374
+    result = result.css.replace(/(\.[^.]+)\1+/g, '$1');
+    fs.writeFileSync(`${opts.output}/${opts.name}.css`, result);
+})();

@@ -76,8 +76,7 @@ build/global.css: $(wildcard src/app/styles/*)
 build/bundle%js build/bundle%css: \
 src/app/main.ts \
 $(wildcard src/app/components/*) \
-$(wildcard src/app/scripts/*) \
-src/app/styles/variables.scss
+$(wildcard src/app/scripts/*)
 	node scripts/app.js \
 	--name bundle \
 	--output build \
