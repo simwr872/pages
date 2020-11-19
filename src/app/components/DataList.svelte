@@ -8,6 +8,7 @@
 <script lang="ts">
     import { fade } from 'svelte/transition';
 
+    export let error = false;
     export let items: Item[] = [];
     export let type = 'item';
     export let create = async (filter: string): Promise<Item> => ({ value: filter, text: filter });
@@ -73,6 +74,7 @@
         if (event.target == element || element.contains(event.target as Node)) {
             isActive = !isActive;
         } else if (isActive) {
+            // TODO: if target is datalist, focus it
             if (event.target != listElement && !listElement.contains(event.target as Node)) {
                 deactivate();
             }
@@ -112,75 +114,81 @@
 </script>
 
 <style lang="scss">
+    @use "sass:color";
+    @use '../styles/mixins.scss';
+    @use '../styles/colors.scss';
     .select {
         position: relative;
     }
     .faded {
-        color: #999;
+        color: colors.$placeholder;
     }
     .placeholder {
         cursor: pointer;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0 0.75em;
         &.active {
-            border-bottom-color: transparent;
+            box-shadow: none;
+            border-color: colors.$border;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
         }
     }
-    .list {
+    .list-container {
+        position: absolute;
+        padding-top: 44px;
+        top: 0;
         z-index: 1;
-        background: #fff;
         width: 100%;
-        max-height: 15em;
         display: flex;
         flex-direction: column;
-        border: 1px solid #dbdbdb;
-        border-bottom-left-radius: 3px;
-        border-bottom-right-radius: 3px;
+        border-radius: 3px;
         overflow: hidden;
-        box-shadow: 0 0.5em 1em -0.125em rgba(0, 0, 0, 0.1);
+        border: 1px solid;
+        @include mixins.focus;
+    }
+    .list {
+        background: #fff;
     }
     .items {
+        max-height: 10em;
         overflow-y: auto;
-        > div {
-            padding: 0.5em 0.75em;
-            &.active {
-                background: #3273dc !important;
-                color: #fff;
-            }
-            &.selected {
-                background: #ddd;
-            }
-        }
     }
     .item {
+        @include mixins.target;
         cursor: pointer;
+        padding: 0 1em;
+        display: flex;
+        align-items: center;
+        &.active {
+            background: colors.$focus !important;
+            color: #fff;
+        }
+        &.selected {
+            background: #ddd;
+        }
     }
     .create {
-        border-top: 1px solid #dbdbdb;
+        border-top: 1px solid colors.$border;
         padding: 0.5em 0.75em;
         font-weight: bold;
         &:hover {
-            background: #3273dc;
+            background: colors.$focus;
             color: #fff;
         }
     }
     .filter {
-        padding: 5px;
-        border-bottom: 1px solid #dbdbdb;
-    }
-    .list {
-        position: absolute;
+        padding: 0.5em .75em;
+        border-bottom: 1px solid colors.$border;
     }
 </style>
 
 <svelte:window on:mousedown={handleMousedown} />
 <div class="select">
     <div
-        class="input placeholder"
+        class="input ghost placeholder"
+        class:error
         class:faded={!selectedItem}
         class:active={isActive}
         tabindex="0"
@@ -190,34 +198,36 @@
         <span>▼</span>
     </div>
     {#if isActive}
-        <div class="list" bind:this={listElement} transition:fade={{duration: 100}}>
-            <div class="filter">
-                <input
-                    type="text"
-                    class="input"
-                    use:activated
-                    on:keydown={handleFilterKeydown}
-                    bind:value={filter}
-                    placeholder="Type to filter or create {type}" />
-            </div>
-            <div class="items" bind:this={itemsElement}>
-                {#each filteredItems as item, index}
-                    <div
-                        class="item"
-                        class:selected={selectedItem == item}
-                        class:active={activeIndex == index}
-                        on:mouseover={() => (activeIndex = index)}
-                        on:click={select}>
-                        {item.text}
-                    </div>
-                {/each}
-                {#if !filteredItems.length}
-                    <div class="faded">No results found</div>
+        <div class="list-container" transition:fade={{ duration: 100 }}>
+            <div class="list" bind:this={listElement}>
+                <div class="filter">
+                    <input
+                        type="text"
+                        class="input ghost block"
+                        use:activated
+                        on:keydown={handleFilterKeydown}
+                        bind:value={filter}
+                        placeholder="Type to filter or create {type}" />
+                </div>
+                <div class="items" bind:this={itemsElement}>
+                    {#each filteredItems as item, index}
+                        <div
+                            class="item"
+                            class:selected={selectedItem == item}
+                            class:active={activeIndex == index}
+                            on:mouseover={() => (activeIndex = index)}
+                            on:click={select}>
+                            {item.text}
+                        </div>
+                    {/each}
+                    {#if !filteredItems.length}
+                        <div class="faded item">No results found</div>
+                    {/if}
+                </div>
+                {#if validItem}
+                    <div class="create item" on:click={handleCreate}>Create {type} "{filter}"</div>
                 {/if}
             </div>
-            {#if validItem}
-                <div class="create item" on:click={handleCreate}>Create {type} "{filter}"</div>
-            {/if}
         </div>
     {/if}
 </div>

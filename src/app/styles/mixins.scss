@@ -1,12 +1,58 @@
 @use "./colors.scss";
 @use 'sass:color';
 
-@mixin focus {
-    border-color: colors.$focus;
-    box-shadow: 0 0 0 0.125em color.change(colors.$focus, $alpha: 0.25);
+@mixin text-contrast($n) {
+    $color-brightness: round((red($n) * 299) + (green($n) * 587) + (blue($n) * 114) / 1000);
+    $light-color: round(
+        (red(#ffffff) * 299) + (green(#ffffff) * 587) + (blue(#ffffff) * 114) / 1000
+    );
+
+    @if abs($color-brightness) < ($light-color/2) {
+        color: #fff;
+    } @else {
+        color: colors.$dark;
+    }
 }
 
-@mixin button($color) {
+@mixin focus($color: colors.$focus) {
+    border-color: $color;
+    box-shadow: 0 0 0 0.125em color.change($color, $alpha: 0.25);
+}
+
+@mixin target {
+    height: 44px;
+}
+
+@mixin input {
+    @include target;
+    border-radius: 3px;
+    outline: 0;
+    margin: 0;
+    border: 0;
+    padding: 0 1em;
+    font-size: inherit;
+}
+
+@mixin input-ghost {
+    background: #fff;
+    color: colors.$dark;
+    border: 1px solid colors.$border;
+    &:hover {
+        border-color: color.scale(colors.$border, $lightness: -15%);
+    }
+    &:active {
+        border-color: color.scale(colors.$border, $lightness: -45%);
+    }
+    &:focus:not(:active) {
+        @include focus;
+    }
+    &.error:not(:active) {
+        @include focus(colors.$error);
+    }
+}
+
+@mixin input-color($color) {
+    @include text-contrast($color);
     background: $color;
     &:hover:not(:disabled):not(:active) {
         background: color.scale($color, $lightness: -15%);

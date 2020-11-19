@@ -102,24 +102,33 @@
         await (await db).delete('sets', id);
         fetchSets(compactDate(date));
     }
+
+    let error = false;
+    $: if (error && !!selectedItem) {
+        error = false;
+    }
+
+    function handleAdd() {
+        if (!selectedItem) {
+            error = true;
+        } else {
+            error = false;
+            spinner = true;
+        }
+    }
 </script>
 
 <section>
     <div class="label">Date</div>
-    <input class="input" type="date" bind:value={date} />
+    <input class="input ghost" type="date" bind:value={date} />
 </section>
 
 <section>
     <div class="label">Exercise</div>
-    <DataList bind:selectedItem bind:items={exercises} create={createExercise} type="exercise" />
+    <DataList bind:selectedItem bind:items={exercises} create={createExercise} type="exercise" bind:error />
 </section>
 
-<section>
-    <button
-        class="button primary block"
-        on:click={() => (spinner = true)}
-        disabled={!selectedItem}>Add set</button>
-</section>
+<section><button class="button primary" style="width: 100%;" on:click={handleAdd}>Add set</button></section>
 
 <section>
     <div class="label">Sets</div>

@@ -11,29 +11,14 @@
     font-family: inherit;
     color: inherit;
 }
-input {
-    font-size: inherit;
-}
-body {
-    margin: 0 16px;
-}
 html {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
         Cantarell, 'Helvetica Neue', sans-serif;
     font-size: 16px;
     color: colors.$dark;
 }
-.input {
-    background: #fff;
-    border: 1px solid #dbdbdb;
-    border-radius: 3px;
-    outline: 0;
-    height: 44px;
-    padding: 0.5em 0.75em;
-    width: 100%;
-    &:focus {
-        @include mixins.focus;
-    }
+body {
+    margin: 0 1em;
 }
 
 section {
@@ -43,43 +28,28 @@ section {
     margin-bottom: 0.5em;
 }
 
-.button {
-    margin: 0;
-    outline: 0;
-    border: 0;
-    border-radius: 3px;
-    height: 44px;
-    cursor: pointer;
-    padding: 0 1em;
+.input {
+    @include mixins.input;
     font-size: inherit;
-    color: #fff;
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    &::placeholder {
+        color: colors.$placeholder;
     }
-    &.block {
-        display: block;
-        width: 100%;
-    }
+}
+
+.ghost {
+    @include mixins.input-ghost;
+}
+
+.button {
+    @include mixins.input;
+    cursor: pointer;
     &.primary {
-        @include mixins.button(colors.$primary);
+        @include mixins.input-color(colors.$primary);
     }
     &.secondary {
-        color: colors.$dark;
-        @include mixins.button(colors.$secondary);
-    }
-    &.ghost {
-        background: #fff;
-        color: colors.$dark;
-        border: 1px solid colors.$border;
-        &:hover {
-            border-color: color.scale(colors.$border, $lightness: -15%);
-        }
-        &:active {
-            border-color: color.scale(colors.$border, $lightness: -45%);
-        }
-        &:focus:not(:active) {
-            @include mixins.focus;
-        }
+        @include mixins.input-color(colors.$secondary);
     }
 }

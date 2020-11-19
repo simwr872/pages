@@ -76,7 +76,7 @@ const opts = program
                         booleans_as_integers: true,
                         drop_console: true,
                         keep_fargs: false,
-                        passes: 2,
+                        passes: 5,
                         unsafe: true,
                         unsafe_arrows: true,
                         unsafe_Function: true,

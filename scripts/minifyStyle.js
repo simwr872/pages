@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const cssnano = require('cssnano');
+const CleanCSS = require('clean-css');
 const program = require('commander').program;
 
 const opts = program
@@ -21,8 +21,15 @@ const opts = program
     opts.styles.forEach((style) => {
         result += fs.readFileSync(style).toString();
     });
-    result = await cssnano.process(result);
     // see https://github.com/sveltejs/svelte/issues/4374
-    result = result.css.replace(/(\.[^.]+)\1+/g, '$1');
+    result = result.replace(/(\.[^.]+)\1+/g, '$1');
+    // TODO: cssnano doesn't merge rules but its the only minifier to simplify calc().
+    result = new CleanCSS({
+        level: {
+            2: {
+                all: true
+            }
+        }
+    }).minify(result).styles;
     fs.writeFileSync(`${opts.output}/${opts.name}.css`, result);
 })();
