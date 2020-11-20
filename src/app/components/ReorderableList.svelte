@@ -171,7 +171,7 @@
     {#each items as item (item.id)}
         <li
             animate:flip={{ duration: 100 }}
-            transition:fade={{duration: 100}}
+            transition:fade|local={{duration: 100}}
             class="item"
             class:ghost={grabbedId == item.id}
             data-id={item.id}>

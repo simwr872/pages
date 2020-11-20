@@ -1,8 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { each } from 'svelte/internal';
-import Analytics from './Analytics.svelte';
-import Settings from './Settings.svelte';
+    import Analytics from './Analytics.svelte';
+    import Settings from './Settings.svelte';
     import Workout from './Workout.svelte';
 
     onMount(() => {
@@ -20,13 +19,19 @@ import Settings from './Settings.svelte';
     let page = 'Workout';
 </script>
 
+<style lang="scss">
+    main {
+        padding: 1em;
+    }
+</style>
+
 <nav>
-    <ol>
+    <div class="g-container-small">
         {#each Object.keys(pages) as name}
-            <li class:active={page == name} on:click={() => (page = name)}>{name}</li>
+            <button class:active={page == name} on:click={() => (page = name)}>{name}</button>
         {/each}
-    </ol>
+    </div>
 </nav>
-<main>
+<main class="g-container">
     <svelte:component this={pages[page]} />
 </main>

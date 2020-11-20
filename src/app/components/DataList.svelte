@@ -117,7 +117,7 @@
     @use "sass:color";
     @use '../styles/mixins.scss';
     @use '../styles/colors.scss';
-    .select {
+    .container {
         position: relative;
     }
     .faded {
@@ -128,28 +128,27 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: relative;
         &.active {
-            box-shadow: none;
-            border-color: colors.$border;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
+            z-index: 2;
         }
     }
-    .list-container {
+    .list {
+        background: #fff;
         position: absolute;
-        padding-top: 44px;
-        top: 0;
+        top: 44px;
         z-index: 1;
         width: 100%;
         display: flex;
         flex-direction: column;
-        border-radius: 3px;
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
         overflow: hidden;
-        border: 1px solid;
-        @include mixins.focus;
-    }
-    .list {
-        background: #fff;
+        border: 1px solid colors.$border;
+        border-top: 0;
+        box-shadow: 0 0.5em 1em -0.125em rgba(0,0,0,.4);
     }
     .items {
         max-height: 10em;
@@ -179,15 +178,15 @@
         }
     }
     .filter {
-        padding: 0.5em .75em;
+        padding: 0.5em 0.75em;
         border-bottom: 1px solid colors.$border;
     }
 </style>
 
 <svelte:window on:mousedown={handleMousedown} />
-<div class="select">
+<div class="container">
     <div
-        class="input ghost placeholder"
+        class="input placeholder"
         class:error
         class:faded={!selectedItem}
         class:active={isActive}
@@ -198,8 +197,7 @@
         <span>▼</span>
     </div>
     {#if isActive}
-        <div class="list-container" transition:fade={{ duration: 100 }}>
-            <div class="list" bind:this={listElement}>
+        <div class="list" transition:fade={{ duration: 100 }} bind:this={listElement}>
                 <div class="filter">
                     <input
                         type="text"
@@ -227,7 +225,6 @@
                 {#if validItem}
                     <div class="create item" on:click={handleCreate}>Create {type} "{filter}"</div>
                 {/if}
-            </div>
         </div>
     {/if}
 </div>

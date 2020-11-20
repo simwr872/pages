@@ -20,6 +20,28 @@ html {
     height: 100%;
 }
 
+$max-width: 700px;
+body {
+    margin: 0;
+}
+.g-container {
+    position: relative;
+    width: 100%;
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 1em;
+}
+.g-container-small {
+    position: relative;
+    width: 100%;
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 0.5em;
+    @media (max-width: $max-width) {
+        padding: 0;
+    }
+}
+
 section {
     margin: 1em 0;
     &:first-child {
@@ -33,120 +55,98 @@ section {
     margin-bottom: 0.5em;
 }
 
+input,
 .input {
     @include mixins.input;
     font-size: inherit;
     display: flex;
     align-items: center;
     width: 100%;
+    background: #fff;
+    color: colors.$dark;
+    border: 1px solid colors.$border;
     &::placeholder {
         color: colors.$placeholder;
     }
+    &:focus {
+        @include mixins.focus;
+    }
+    &.error {
+        @include mixins.focus(colors.$error);
+    }
 }
 
-.ghost {
-    @include mixins.input-ghost;
-}
-
-.button {
+button {
     @include mixins.input;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     &.primary {
-        @include mixins.input-color(colors.$primary);
+        @include mixins.button(colors.$primary);
     }
-    &.secondary {
-        @include mixins.input-color(colors.$secondary);
+    &.gray {
+        @include mixins.button(colors.$gray);
     }
-}
-
-$breakpoint: 600px;
-$max-width: 800px;
-$nav-width: 200px;
-body {
-    margin: 0 auto;
-    max-width: $max-width;
-    padding: 0;
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 200px auto;
-}
-
-main {
-    padding: 1em;
 }
 
 nav {
-    width: 200px;
-    padding-left: 1em;
-    ol {
-        position: sticky;
-        top: 0;
-        padding: 0;
-        padding-top: 1em;
-        list-style: none;
-        margin: 0;
-    }
-    li {
-        @include mixins.input-ghost;
-        @include mixins.input;
-        border-radius: 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    > * {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        cursor: pointer;
-        margin: -1px 0;
+        justify-content: space-between;
+    }
+    button {
+        $PERCENT: 10%;
+        $color: colors.$gray;
+        flex-basis: 0;
+        flex-grow: 1;
+        border-radius: 0;
+        border: 1px solid color.scale($color, $lightness: -40%);
+        border-top: 0;
+        background: linear-gradient(
+            to bottom,
+            color.scale($color, $lightness: $PERCENT),
+            color.scale($color, $lightness: -$PERCENT)
+        );
+        &:hover {
+            background: linear-gradient(
+                to bottom,
+                color.scale($color, $lightness: $PERCENT - $PERCENT/2),
+                color.scale($color, $lightness: -$PERCENT - $PERCENT/2)
+            );
+        }
+        &:active {
+            background: linear-gradient(
+                to top,
+                color.scale($color, $lightness: $PERCENT),
+                color.scale($color, $lightness: -$PERCENT)
+            );
+        }
+        &.active {
+            border-bottom: 1px solid colors.$focus;
+            box-shadow: 0 0.125em 0 0 color.change(colors.$focus, $alpha: 0.25);
+        }
         &:first-of-type {
-            border-top-right-radius: 3px;
-            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
         }
         &:last-of-type {
             border-bottom-right-radius: 3px;
-            border-bottom-left-radius: 3px;
         }
-        &:hover {
-            z-index: 1;
-        }
-        &.active {
-            @include mixins.focus;
-            z-index: 2;
-        }
-    }
-}
-
-@media (max-width: $breakpoint) {
-    body {
-        height: 100%;
-        grid-template-rows: auto 1fr;
-        grid-template-columns: 1fr;
-    }
-    main {
-        height: 100%;
-        overflow-y: auto;
-    }
-    nav {
-        width: 100%;
-        padding: 0;
-        ol {
-            padding: 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        li {
-            margin: 0;
-            border-radius: 0;
-            flex-basis: 0;
-            flex-grow: 1;
-            border: 0;
-            border-bottom: 1px solid colors.$border;
-            &.active {
-                border: 0;
-                border-bottom: 1px solid colors.$focus;
-                box-shadow: 0 0.125em 0 0 color.change(colors.$focus, $alpha: 0.25);
+        @media (max-width: $max-width) {
+            &:first-of-type {
+                border-bottom-left-radius: 0;
+                border-left: 0;
             }
+            &:last-of-type {
+                border-bottom-right-radius: 0;
+                border-right: 0;
+            }
+        }
+        &:not(:last-of-type):not(:first-of-type) {
+            margin: 0 -1px;
         }
     }
 }

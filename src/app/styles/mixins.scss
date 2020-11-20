@@ -28,39 +28,35 @@
     border-radius: 3px;
     outline: 0;
     margin: 0;
+    border: 0;
     padding: 0 1em;
     font-size: inherit;
 }
 
-@mixin input-ghost {
-    background: #fff;
-    color: colors.$dark;
-    border: 1px solid colors.$border;
+@mixin button($color) {
+    $PERCENT: 10%;
+    @include text-contrast($color);
+    border: 1px solid color.scale($color, $lightness: -40%);
+    background: linear-gradient(
+        to bottom,
+        color.scale($color, $lightness: $PERCENT),
+        color.scale($color, $lightness: -$PERCENT)
+    );
     &:hover {
-        border-color: color.scale(colors.$border, $lightness: -15%);
+        background: linear-gradient(
+            to bottom,
+            color.scale($color, $lightness: $PERCENT - $PERCENT/2),
+            color.scale($color, $lightness: -$PERCENT - $PERCENT/2)
+        );
     }
-    &:active {
-        border-color: color.scale(colors.$border, $lightness: -45%);
-    }
-    &:focus:not(:active) {
+    &:focus {
         @include focus;
     }
-    &.error:not(:active) {
-        @include focus(colors.$error);
-    }
-}
-
-@mixin input-color($color) {
-    @include text-contrast($color);
-    border: 0;
-    background: $color;
-    &:hover:not(:disabled):not(:active) {
-        background: color.scale($color, $lightness: -15%);
-    }
     &:active {
-        background: color.scale($color, $lightness: -30%);
-    }
-    &:focus:not(:active) {
-        box-shadow: 0 0 0 0.125em color.change($color, $alpha: 0.25);
+        background: linear-gradient(
+            to top,
+            color.scale($color, $lightness: $PERCENT),
+            color.scale($color, $lightness: -$PERCENT)
+        );
     }
 }

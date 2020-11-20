@@ -51,7 +51,11 @@
     }
 
     let date = dateString(new Date());
-    $: fetchSets(compactDate(date));
+    $: if(date) {
+        fetchSets(compactDate(date));
+    } else {
+        sets = [];
+    }
 
     onMount(fetchExercises);
 
@@ -120,7 +124,7 @@
 
 <section>
     <div class="label">Date</div>
-    <input class="input ghost" type="date" bind:value={date} />
+    <input type="date" placeholder="Select date" bind:value={date} />
 </section>
 
 <section>
@@ -128,7 +132,7 @@
     <DataList bind:selectedItem bind:items={exercises} create={createExercise} type="exercise" bind:error />
 </section>
 
-<section><button class="button primary" style="width: 100%;" on:click={handleAdd}>Add set</button></section>
+<section><button class="primary" style="width: 100%;" on:click={handleAdd}>Add set</button></section>
 
 <section>
     <div class="label">Sets</div>
