@@ -33,6 +33,7 @@
 
 <style lang="scss">
     @use '../styles/colors.scss';
+    $z-index: 10;
     .overlay {
         background: rgba(0, 0, 0, 0.5);
         position: fixed;
@@ -40,6 +41,7 @@
         width: 100%;
         top: 0;
         left: 0;
+        z-index: $z-index;
     }
     .header {
         display: flex;
@@ -55,6 +57,7 @@
         width: 100%;
         bottom: 0;
         left: 0;
+        z-index: $z-index + 1;
     }
     .body {
         display: flex;
