@@ -1,7 +1,7 @@
 # dev: make
 # demo: make APP="--demo --minify"
 # build: make APP=--minify
-BIN := $(shell yarn bin)
+BIN := $(shell npm bin)
 APP := --demo
 
 .SECONDARY:
