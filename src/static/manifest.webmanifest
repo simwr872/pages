@@ -3,7 +3,7 @@
     "display": "standalone",
     "background_color": "#004985",
     "theme_color": "#004985",
-    "start_url": "/index.html",
+    "start_url": "/",
     "icons": [
         {
             "src": "./32.png",

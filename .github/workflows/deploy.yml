@@ -13,7 +13,7 @@ jobs:
       - run: |
           repo=$(echo "$GITHUB_REPOSITORY" | cut --delimiter / --fields 2)
           file=public/manifest.webmanifest
-          result=$(jq -c --arg url "/$repo/index.html" '.start_url = $url' "$file")
+          result=$(jq -c --arg url "/$repo/" '.start_url = $url' "$file")
           echo "$result" > "$file"
       - uses: peaceiris/actions-gh-pages@v3
         with:
