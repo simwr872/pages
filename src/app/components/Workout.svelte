@@ -43,11 +43,6 @@
                 tx.store.put(set.value);
             })
         );
-        /*db.transaction('rw', db.sets, () => {
-            sets.forEach((set, index) => {
-                db.sets.update(set.id, { position: index });
-            });
-        });*/
     }
 
     let date = dateString(new Date());
@@ -136,7 +131,7 @@
 
 <section>
     <div class="label">Sets</div>
-    <ReorderableList bind:items={sets} on:change={handleChange} onDelete={deleteSet} />
+    <ReorderableList bind:items={sets} on:change={handleChange} onDelete={deleteSet} empty="No sets this date"/>
     <Spinner
         bind:visible={spinner}
         {columns}

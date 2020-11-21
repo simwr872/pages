@@ -74,7 +74,6 @@
         if (event.target == element || element.contains(event.target as Node)) {
             isActive = !isActive;
         } else if (isActive) {
-            // TODO: if target is datalist, focus it
             if (event.target != listElement && !listElement.contains(event.target as Node)) {
                 deactivate();
             }

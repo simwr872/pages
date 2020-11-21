@@ -17,6 +17,7 @@
 
     export let onDelete: (id: number) => any;
     export let items: Item[] = [];
+    export let empty = "Empty";
 
     let grabbedId: number;
     let grabbedOffset: number;
@@ -66,6 +67,7 @@
 </script>
 
 <style lang="scss">
+    @use "../styles/colors.scss";
     .items {
         background: #ddd;
         padding: 0;
@@ -156,6 +158,9 @@
         justify-content: center;
         align-items: center;
     }
+    .boundary {
+        border-top-color: colors.$secondary;
+    }
 </style>
 
 <svelte:window on:mousemove={(event) => drag(event.clientY)} on:mouseup={drop} />
@@ -166,13 +171,14 @@
         </li>
     {/if}
     {#if !items.length}
-        <div class="placeholder">Empty</div>
+        <div class="placeholder">{empty}</div>
     {/if}
-    {#each items as item (item.id)}
+    {#each items as item, index (item.id)}
         <li
             animate:flip={{ duration: 100 }}
             transition:fade|local={{duration: 100}}
             class="item"
+            class:boundary={index && items[index-1].title != item.title}
             class:ghost={grabbedId == item.id}
             data-id={item.id}>
             <div>

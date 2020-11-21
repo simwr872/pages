@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import Analytics from './Analytics.svelte';
     import Settings from './Settings.svelte';
     import Workout from './Workout.svelte';
+    import { onMount } from 'svelte';
 
     onMount(() => {
         try {
@@ -11,12 +11,12 @@
             console.log('NO');
         }
     });
-    let pages = {
+    let currentPage = 'Workout';
+    const pages = {
         Analytics: Analytics,
         Workout: Workout,
         Settings: Settings,
     };
-    let page = 'Workout';
 </script>
 
 <style lang="scss">
@@ -27,11 +27,13 @@
 
 <nav>
     <div class="g-container-small">
-        {#each Object.keys(pages) as name}
-            <button class:active={page == name} on:click={() => (page = name)}>{name}</button>
+        {#each Object.keys(pages) as page}
+            <button
+                class:active={currentPage == page}
+                on:click={() => (currentPage = page)}>{page}</button>
         {/each}
     </div>
 </nav>
 <main class="g-container">
-    <svelte:component this={pages[page]} />
+    <svelte:component this={pages[currentPage]} />
 </main>
