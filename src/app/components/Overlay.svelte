@@ -1,11 +1,11 @@
 <script lang="ts">
     import { fade } from 'svelte/transition';
-    export let visible = false;
+    export let isVisible = false;
 
     let overlay: HTMLElement;
     function handleClick(event: MouseEvent) {
         if (event.target == overlay) {
-            visible = false;
+            isVisible = false;
         }
     }
 </script>
@@ -24,7 +24,7 @@
     }
 </style>
 
-{#if visible}
+{#if isVisible}
     <div
         bind:this={overlay}
         class="overlay"

@@ -52,7 +52,7 @@
 
     function drop() {
         grabbedId = null;
-        dispatch('change');
+        dispatch('reorder');
     }
 
     function grab(y: number, id: number) {
@@ -175,7 +175,7 @@
     {/if}
     {#each items as item, index (item.id)}
         <li
-            animate:flip={{ duration: 100 }}
+            animate:flip|local={{ duration: 100 }}
             transition:fade|local={{duration: 100}}
             class="item"
             class:boundary={index && items[index-1].title != item.title}
@@ -195,7 +195,7 @@
                     on:touchmove={(event) => drag(event.touches[0].clientY)}
                     on:touchend={drop}
                     on:touchcancel={drop}>&dots;</span>
-                <div class="text"><span>{item.title}</span><span>{item.body}</span></div>
+                <div class="text"><b>{item.title}</b><span>{item.body}</span></div>
             </div>
             <button class="delete" on:click={() => onDelete(item.id)}>✕</button>
         </li>

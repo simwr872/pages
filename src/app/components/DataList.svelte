@@ -8,7 +8,7 @@
 <script lang="ts">
     import { fade } from 'svelte/transition';
 
-    export let error = false;
+    export let isError = false;
     export let items: Item[] = [];
     export let type = 'item';
     export let create = async (filter: string): Promise<Item> => ({ value: filter, text: filter });
@@ -186,7 +186,7 @@
 <div class="container">
     <div
         class="input placeholder"
-        class:error
+        class:error={isError}
         class:faded={!selectedItem}
         class:active={isActive}
         tabindex="0"

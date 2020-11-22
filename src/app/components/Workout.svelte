@@ -1,60 +1,78 @@
 <script lang="ts">
     import DataList from './DataList.svelte';
     import type { Item as DataListItem } from './DataList.svelte';
-    import { onMount } from 'svelte';
     import type { Item as ReorderableListItem } from './ReorderableList.svelte';
     import db from '../scripts/database';
-    import { compactDate, dateString } from '../scripts/date';
+    import { roundWeight } from '../scripts/math';
+    import { compactDate } from '../scripts/date';
     import ReorderableList from './ReorderableList.svelte';
     import Spinner from './Spinner.svelte';
-    let exercises: DataListItem[] = [];
+    import type { Column } from './Spinner.svelte';
+    import Table from './Table.svelte';
+    import { date, exerciseId, exercises, weightIndex, repititionIndex } from '../scripts/stores';
 
-    async function fetchExercises() {
-        exercises = (await (await db).getAll('exercises')).map((exercise) => ({
-            value: exercise.id,
-            text: exercise.name,
-        }));
-        exercises.sort((a, b) => a.text.localeCompare(b.text));
+    let spinnerTitle: string;
+    $: if ($exerciseId != null) {
+        $exercises.then((arr) => (spinnerTitle = arr.find((obj) => obj.id == $exerciseId).name));
     }
-    let selectedItem: DataListItem;
+
+    $: $date, fetchSets();
+    async function fetchSets() {
+        if ($date) {
+            const arr = await $exercises;
+            let sets = await (await db).getAllFromIndex('sets', 'date', compactDate($date));
+            sets.sort((a, b) => a.position - b.position);
+            setList = sets.map((set) => ({
+                id: set.id,
+                title: arr.find((exercise) => exercise.id == set.exercise_id).name,
+                body: `${set.repititions}x${set.weight} kg`,
+                value: set,
+            }));
+        } else {
+            setList = [];
+        }
+    }
+
+    let exerciseList: DataListItem[] = [];
+    $: $exercises.then(
+        (exercises) =>
+            (exerciseList = exercises
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((exercise) => ({
+                    text: exercise.name,
+                    value: exercise.id,
+                })))
+    );
+
+    let selectedExercise: DataListItem;
+    if ($exerciseId != null) {
+        $exercises.then((exercises) => {
+            let obj = exercises.find((obj) => obj.id == $exerciseId);
+            selectedExercise = {
+                value: obj.id,
+                text: obj.name,
+            };
+        });
+    }
     async function createExercise(name: string): Promise<DataListItem> {
         let id = await (await db).put('exercises', { name });
+        $exercises = (await db).getAll('exercises');
         return { text: name, value: id };
     }
 
-    let sets: ReorderableListItem[] = [];
-    async function fetchSets(date: number) {
-        let exercises = await (await db).getAll('exercises');
-        let data = await (await db).getAllFromIndex('sets', 'date', date);
-        data.sort((a, b) => a.position - b.position);
-        sets = data.map((set) => ({
-            id: set.id,
-            title: exercises.find((exercise) => exercise.id == set.exercise_id).name,
-            body: `${set.repititions}x${set.weight} kg`,
-            value: set,
-        }));
-    }
+    let setList: ReorderableListItem[] = [];
 
-    async function handleChange() {
+    async function onListReorder() {
         const tx = (await db).transaction('sets', 'readwrite');
         await Promise.all(
-            sets.map((set, index) => {
+            setList.map((set, index) => {
                 set.value.position = index;
                 tx.store.put(set.value);
             })
         );
     }
 
-    let date = dateString(new Date());
-    $: if(date) {
-        fetchSets(compactDate(date));
-    } else {
-        sets = [];
-    }
-
-    onMount(fetchExercises);
-
-    let spinner = false;
+    let isSpinnerVisible = false;
 
     function irregularInterval(checkpoints: [number, number][]) {
         let values = [];
@@ -80,61 +98,124 @@
         reps.push({ value: i, text: i.toString() });
     }
 
-    let columns = [
-        { text: 'Weight (kg)', name: 'weight', items: weights, selectedIndex: 0 },
-        { text: 'Repititions', name: 'repititions', items: reps, selectedIndex: 0 },
-    ];
+    const repColumn: Column = { text: 'Repititions', items: reps, selectedIndex: $repititionIndex };
+    const weightColumn: Column = {
+        text: 'Weight (kg)',
+        items: weights,
+        selectedIndex: $weightIndex,
+    };
+    const columns = [repColumn, weightColumn];
 
-    async function handleConfirm(event: CustomEvent) {
-        let data = event.detail;
+    function setsChanged() {
+        fetchSets();
+        updateEstimatedStrengthRows();
+    }
+
+    async function onSpinnerConfirm() {
+        $repititionIndex = repColumn.selectedIndex;
+        $weightIndex = weightColumn.selectedIndex;
         await (await db).add('sets', {
-            date: compactDate(date),
-            exercise_id: selectedItem.value,
-            position: sets.length,
-            weight: data.weight,
-            repititions: data.repititions,
+            date: compactDate($date),
+            exercise_id: selectedExercise.value,
+            position: setList.length,
+            weight: weightColumn.items[weightColumn.selectedIndex].value,
+            repititions: repColumn.items[repColumn.selectedIndex].value,
         });
-        fetchSets(compactDate(date));
+        setsChanged();
     }
 
     async function deleteSet(id: number) {
         await (await db).delete('sets', id);
-        fetchSets(compactDate(date));
+        setsChanged();
     }
 
-    let error = false;
-    $: if (error && !!selectedItem) {
-        error = false;
+    let isExerciseListError = false;
+    $: if (isExerciseListError && !!selectedExercise) {
+        isExerciseListError = false;
     }
 
-    function handleAdd() {
-        if (!selectedItem) {
-            error = true;
+    function addSet() {
+        if (!selectedExercise) {
+            isExerciseListError = true;
         } else {
-            error = false;
-            spinner = true;
+            isExerciseListError = false;
+            isSpinnerVisible = true;
         }
+    }
+
+    let estimatedStrengthRows: [any, any][];
+    function populateEstimatedStrengthRows(oneRepMax: number = null) {
+        estimatedStrengthRows = [1, 5, 8, 12].map((reps) => {
+            if (oneRepMax == null) {
+                return [reps, '-'];
+            } else if (reps == 1) {
+                return [reps, roundWeight(oneRepMax)];
+            } else {
+                return [reps, roundWeight(oneRepMax / (1 + reps / 30))];
+            }
+        });
+    }
+
+    async function updateEstimatedStrengthRows() {
+        if (selectedExercise) {
+            const now = Date.now();
+            const records = (
+                await (await db).getAllFromIndex(
+                    'sets',
+                    'date',
+                    IDBKeyRange.bound(compactDate(now - 86400000), compactDate(now))
+                )
+            )
+                .filter((set) => set.exercise_id == selectedExercise.value)
+                .map((set) =>
+                    set.repititions > 1 ? set.weight * (1 + set.repititions / 30) : set.weight
+                );
+            if (records.length) {
+                return populateEstimatedStrengthRows(Math.max(...records));
+            }
+        }
+        populateEstimatedStrengthRows();
+    }
+
+    $: {
+        // selectedItem
+        if (selectedExercise) $exerciseId = selectedExercise.value;
+        updateEstimatedStrengthRows();
     }
 </script>
 
 <section>
     <div class="label">Date</div>
-    <input type="date" placeholder="Select date" bind:value={date} />
+    <input type="date" placeholder="Select date" bind:value={$date} />
 </section>
 
 <section>
     <div class="label">Exercise</div>
-    <DataList bind:selectedItem bind:items={exercises} create={createExercise} type="exercise" bind:error />
+    <DataList
+        bind:selectedItem={selectedExercise}
+        bind:items={exerciseList}
+        create={createExercise}
+        type="exercise"
+        bind:isError={isExerciseListError} />
 </section>
 
-<section><button class="primary" style="width: 100%;" on:click={handleAdd}>Add set</button></section>
+<section>
+    <div class="label">Estimated strength</div>
+    <Table rows={estimatedStrengthRows} headings={['Repititions', 'Weight (kg)']} />
+</section>
+
+<section><button class="primary" style="width: 100%;" on:click={addSet}>Add set</button></section>
 
 <section>
     <div class="label">Sets</div>
-    <ReorderableList bind:items={sets} on:change={handleChange} onDelete={deleteSet} empty="No sets this date"/>
+    <ReorderableList
+        bind:items={setList}
+        on:reorder={onListReorder}
+        onDelete={deleteSet}
+        empty="No sets this date" />
     <Spinner
-        bind:visible={spinner}
+        bind:isVisible={isSpinnerVisible}
         {columns}
-        name={selectedItem ? selectedItem.text : ''}
-        on:confirm={handleConfirm} />
+        title={spinnerTitle}
+        on:confirm={onSpinnerConfirm} />
 </section>

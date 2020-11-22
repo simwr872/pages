@@ -1,3 +1,11 @@
+<script lang="ts" context="module">
+    export interface Column {
+        text: string;
+        items: ColumnItem[];
+        selectedIndex: number;
+    }
+</script>
+
 <script lang="ts">
     import { slide } from 'svelte/transition';
     import SpinnerColumn from './SpinnerColumn.svelte';
@@ -5,31 +13,16 @@
     import { createEventDispatcher } from 'svelte';
     import Overlay from './Overlay.svelte';
 
-    export let name: string;
-    export let visible = true;
+    export let title: string;
+    export let isVisible = false;
     export let columns: Column[] = [];
 
     const dispatch = createEventDispatcher();
 
-    interface Column {
-        name: string;
-        text: string;
-        items: ColumnItem[];
-        selectedIndex: number;
-    }
-
-
     function handleConfirm() {
-        visible = false;
-        dispatch(
-            'confirm',
-            columns.reduce((obj, column) => {
-                obj[column.name] = column.items[column.selectedIndex].value;
-                return obj;
-            }, {})
-        );
+        isVisible = false;
+        dispatch('confirm');
     }
-
 </script>
 
 <style lang="scss">
@@ -39,7 +32,7 @@
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid colors.$border;
-        padding: .5em;
+        padding: 0.5em;
     }
     .body {
         display: flex;
@@ -60,12 +53,12 @@
     }
 </style>
 
-<Overlay bind:visible>
+<Overlay bind:isVisible>
     <div class="g-container-small" transition:slide={{ duration: 100 }}>
         <div class="content">
             <div class="header">
-                <button class="gray" on:click={() => (visible = false)}>Cancel</button>
-                <span>{name}</span>
+                <button class="gray" on:click={() => (isVisible = false)}>Cancel</button>
+                <span>{title}</span>
                 <button class="primary" on:click={handleConfirm}>Confirm</button>
             </div>
             <div class="body">

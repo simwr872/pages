@@ -6,8 +6,6 @@
     <b>Rep-record is a progressive web application that keeps track of your gym performance.</b>
 </p>
 
----
-
 # Design goals
 
 * **Cross-platform.** Easy access to the same application across mobile and desktop devices.
