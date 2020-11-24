@@ -13,11 +13,19 @@ export function roundWeight(n: number) {
         [2.5, 200],
         [10, 250],
     ];
-    for(let i = 0; i < intervals.length; i++) {
+    for (let i = 0; i < intervals.length; i++) {
         const interval = intervals[i];
         if (n < interval[1]) {
             return round(n, interval[0]);
         }
     }
     return Math.round(n);
+}
+
+export function lerp(v0: number, v1: number, t: number) {
+    return v0 * (1 - t) + v1 * t;
+}
+
+export function map(value: number, low1: number, high1: number, low2: number, high2: number) {
+    return low2 + ((value - low1) * (high2 - low2)) / (high1 - low1);
 }

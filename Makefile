@@ -1,34 +1,67 @@
-# dev: make
-# demo: make APP="--demo --minify"
-# build: make APP=--minify
 BIN := $(shell npm bin)
-APP := --demo
+$(shell mkdir -p build public)
 
 .SECONDARY:
-.PHONY: directories all clean
+.PHONY: all clean dev demo prod app
 
-all: \
-directories \
+# demo data
+dev: app build/bundle.demo.font.js
+	cp build/bundle.demo.font.js public/script.js
+
+# demo data, minification
+demo: app build/bundle.demo.min.font.js
+	cp build/bundle.demo.min.font.js public/script.js
+
+# minification
+prod: app build/bundle.prod.min.font.js
+	cp build/bundle.prod.min.font.js public/script.js
+
+app: \
 public/32.png \
 public/256.png \
 public/index.html \
-public/bundle.js \
 public/style.css \
 public/icons.woff2 \
 public/manifest.webmanifest \
 public/worker.js
 
+build/%.min.js: build/%.js
+	node scripts/minifyScript.js --input $(^) --output $(@)
+
+build/%.demo.js: build/%.js
+	sed "s/__DEMO__/true/" $(^) > $(@)
+
+build/%.prod.js: build/%.js
+	sed "s/__DEMO__/false/" $(^) > $(@)
+
+build/%.font.js: build/%.js build/font.json
+	node scripts/insertFont.js \
+	--info build/font.json \
+	--input build/${*}.js \
+	--output $(@)
+
+public/icons%woff2 build/font%json: $(wildcard src/app/icons/*.svg)
+	node scripts/iconFont.js \
+	--input $(wildcard src/app/icons/*.svg) \
+	--output public/icons.woff2 \
+	--info build/font.json
+
+build/bundle.j% build/bundle.cs%: \
+src/app/main.ts \
+$(wildcard src/app/components/*) \
+$(wildcard src/app/scripts/*)
+	node scripts/app.js \
+	--output build \
+	--input src/app/main.ts
+
 clean:
 	rm -rf build public
 
-directories:
-	mkdir -p build public
-
 build/worker.js: src/worker/worker.ts
-	$(BIN)/tsc --lib webworker --outFile $(@) $(^)
+	$(BIN)/tsc --project src/worker/tsconfig.json --outFile $(@)
 
-public/worker.js: build/worker.js
-	$(BIN)/terser $(^) --output $(@) --toplevel --compress --mangle --comments false
+public/worker.js: build/worker.min.js
+	cp build/worker.min.js public/worker.js
 
 public/manifest.webmanifest: src/static/manifest.webmanifest
 	node scripts/minifyManifest.js \
@@ -61,24 +94,5 @@ public/index.html: src/static/index.html
 public/style.css: build/global.css build/bundle.css
 	node scripts/minifyStyle.js --output public --name style --styles $(^)
 
-public/icons%woff2 public/bundle%js: \
-build/bundle.js \
-$(wildcard src/app/icons/*.svg)
-	node scripts/iconFont.js \
-	--replace build/bundle.js \
-	--output public \
-	--name icons \
-	--icons $(wildcard src/app/icons/*.svg)
-
 build/global.css: $(wildcard src/app/styles/*)
 	$(BIN)/sass --no-source-map src/app/styles/global.scss $(@)
-
-build/bundle%js build/bundle%css: \
-src/app/main.ts \
-$(wildcard src/app/components/*) \
-$(wildcard src/app/scripts/*)
-	node scripts/app.js \
-	--name bundle \
-	--output build \
-	--file src/app/main.ts \
-	$(APP)

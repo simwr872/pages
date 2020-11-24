@@ -24,5 +24,5 @@
    ```
 3. Make the project.
    ```shell
-   make -j APP=--minify
+   make --jobs
    ```

@@ -1,9 +1,12 @@
 import { writable } from 'svelte/store';
 import {  dateString } from './date';
-import db from './database';
+
+interface DataListItem {
+    value: any;
+    text: string;
+}
 
 export const date = writable(dateString(new Date()));
-export const exercises = writable(db.then((db) => db.getAll('exercises')));
-export const exerciseId = writable<number>(null);
+export const exercise = writable<DataListItem>(null);
 export const weightIndex = writable(0);
 export const repititionIndex = writable(0);

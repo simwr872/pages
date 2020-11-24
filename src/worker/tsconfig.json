@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
-        "lib": ["es2017", "webworker"]
+        "target": "es2017",
+        "lib": ["webworker"]
     }
 }

@@ -7,7 +7,7 @@ self.addEventListener('install', (event: ExtendableEvent) => {
                 './',
                 './32.png',
                 './256.png',
-                './bundle.js',
+                './script.js',
                 './icons.woff2',
                 //'./index.html',
                 //'./manifest.webmanifest',
