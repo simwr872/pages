@@ -11,12 +11,12 @@
             console.log('NO');
         }
     });
-    let currentPage = 'Workout';
     const pages = {
         Analytics: Analytics,
         Workout: Workout,
         Settings: Settings,
     };
+    let currentPage = 'Analytics';
 </script>
 
 <style lang="scss">

@@ -10,7 +10,7 @@
 <script lang="ts">
     import { flip } from 'svelte/animate';
     import { fade } from 'svelte/transition';
-    import { clamp } from '../scripts/math';
+    import { clamp } from '../scripts/helper';
     import { createEventDispatcher } from 'svelte';
 
     const dispatch = createEventDispatcher();

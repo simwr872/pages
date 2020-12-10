@@ -1,7 +1,6 @@
 <script lang="ts">
     import { date, exercise, weightIndex, repititionIndex } from '../scripts/stores';
-    import { roundWeight } from '../scripts/math';
-    import { compactDate } from '../scripts/date';
+    import { roundWeight, compressDate, randomID } from '../scripts/helper';
     import db from '../scripts/database';
 
     import DataList from './DataList.svelte';
@@ -33,7 +32,7 @@
     async function fetchSets() {
         if ($date) {
             const arr = await exercises;
-            let sets = await (await db).getAllFromIndex('sets', 'date', compactDate($date));
+            let sets = await (await db).getAllFromIndex('sets', 'date', compressDate($date));
             sets.sort((a, b) => a.position - b.position);
             setList = sets.map((set) => ({
                 id: set.id,
@@ -58,7 +57,7 @@
     );
 
     async function createExercise(name: string): Promise<DataListItem> {
-        let id = await (await db).put('exercises', { name });
+        let id = await (await db).put('exercises', { id: randomID(), name });
         exercises = (await db).getAll('exercises');
         return { text: name, value: id };
     }
@@ -118,7 +117,8 @@
         $repititionIndex = repColumn.selectedIndex;
         $weightIndex = weightColumn.selectedIndex;
         await (await db).add('sets', {
-            date: compactDate($date),
+            id: randomID(),
+            date: compressDate($date),
             exercise_id: $exercise.value,
             position: setList.length,
             weight: weightColumn.items[weightColumn.selectedIndex].value,
@@ -128,7 +128,7 @@
     }
 
     async function deleteSet(id: number) {
-        await (await db).delete('sets', id);
+        await (await db).delete('sets', [id, compressDate($date)]);
         setsChanged();
     }
 
@@ -160,7 +160,7 @@
                 await (await db).getAllFromIndex(
                     'sets',
                     'date',
-                    IDBKeyRange.bound(compactDate(now - 3600 * 24 * 30 * 1000), compactDate(now))
+                    IDBKeyRange.bound(compressDate(now - 3600 * 24 * 30 * 1000), compressDate(now))
                 )
             )
                 .filter((set) => set.exercise_id == $exercise.value)

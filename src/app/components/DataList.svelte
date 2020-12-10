@@ -11,7 +11,7 @@
     export let isError = false;
     export let items: Item[] = [];
     export let type = 'item';
-    export let create = async (filter: string): Promise<Item> => ({ value: filter, text: filter });
+    export let create: (filter: string) => Promise<Item>;
 
     async function handleCreate() {
         deactivate();
@@ -147,7 +147,7 @@
         overflow: hidden;
         border: 1px solid colors.$border;
         border-top: 0;
-        box-shadow: 0 0.5em 1em -0.125em rgba(0,0,0,.4);
+        box-shadow: 0 0.5em 1em -0.125em rgba(0, 0, 0, 0.4);
     }
     .items {
         max-height: 10em;
@@ -197,33 +197,33 @@
     </div>
     {#if isActive}
         <div class="list" transition:fade={{ duration: 100 }} bind:this={listElement}>
-                <div class="filter">
-                    <input
-                        type="text"
-                        class="input ghost block"
-                        use:activated
-                        on:keydown={handleFilterKeydown}
-                        bind:value={filter}
-                        placeholder="Type to filter or create {type}" />
-                </div>
-                <div class="items" bind:this={itemsElement}>
-                    {#each filteredItems as item, index}
-                        <div
-                            class="item"
-                            class:selected={selectedItem == item}
-                            class:active={activeIndex == index}
-                            on:mouseover={() => (activeIndex = index)}
-                            on:click={select}>
-                            {item.text}
-                        </div>
-                    {/each}
-                    {#if !filteredItems.length}
-                        <div class="faded item">No results found</div>
-                    {/if}
-                </div>
-                {#if validItem}
-                    <div class="create item" on:click={handleCreate}>Create {type} "{filter}"</div>
+            <div class="filter">
+                <input
+                    type="text"
+                    class="input ghost block"
+                    use:activated
+                    on:keydown={handleFilterKeydown}
+                    bind:value={filter}
+                    placeholder={`Type to filter${create != null ? ' or create ' : ' '}${type}`} />
+            </div>
+            <div class="items" bind:this={itemsElement}>
+                {#each filteredItems as item, index}
+                    <div
+                        class="item"
+                        class:selected={selectedItem == item}
+                        class:active={activeIndex == index}
+                        on:mouseover={() => (activeIndex = index)}
+                        on:click={select}>
+                        {item.text}
+                    </div>
+                {/each}
+                {#if !filteredItems.length}
+                    <div class="faded item">No results found</div>
                 {/if}
+            </div>
+            {#if validItem && create != null}
+                <div class="create item" on:click={handleCreate}>Create {type} "{filter}"</div>
+            {/if}
         </div>
     {/if}
 </div>

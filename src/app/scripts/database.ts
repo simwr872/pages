@@ -5,7 +5,7 @@ declare var __DEMO__: boolean;
 
 export interface DB extends DBSchema {
     sets: {
-        key: number;
+        key: [number, number];
         value: ISet;
         indexes: {
             date: number;
@@ -28,14 +28,10 @@ export default (async () => {
     }
     const db = openDB<DB>(name, 1, {
         upgrade(db) {
-            let sets = db.createObjectStore('sets', { keyPath: 'id', autoIncrement: true });
-            sets.createIndex('date', 'date', { unique: false });
+            let sets = db.createObjectStore('sets', { keyPath: ['id', 'date'] });
+            sets.createIndex('date', 'date');
 
-            let exercises = db.createObjectStore('exercises', {
-                keyPath: 'id',
-                autoIncrement: true,
-            });
-            exercises.createIndex('name', 'name', { unique: true });
+            db.createObjectStore('exercises', { keyPath: 'id' });
         },
     });
     if (__DEMO__) {
@@ -45,7 +41,7 @@ export default (async () => {
 })();
 
 export interface ISet {
-    id?: number;
+    id: number;
     date: number;
     exercise_id: number;
     weight: number;
@@ -54,6 +50,6 @@ export interface ISet {
 }
 
 export interface IExercise {
-    id?: number;
+    id: number;
     name: string;
 }

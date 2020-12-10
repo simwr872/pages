@@ -1,68 +1,93 @@
 <script lang="ts">
-    import { lerp, map } from '../scripts/math';
+    import {
+        roundDecimal,
+        groupBy,
+        decompressDate,
+        dateString,
+        compressDate,
+        round,
+    } from '../scripts/helper';
     import db from '../scripts/database';
+    import LineChart from './LineChart.svelte';
+    import DataList from './DataList.svelte';
+    import type { Item as DataListItem } from './DataList.svelte';
+    import { analyticsExercise } from '../scripts/stores';
 
-    const width = 700;
-    const height = 400;
-    const em = 16;
-    const w = width - 2 * em;
-    const h = height - 2 * em;
-    const x = em;
-    const y = em;
+    let exercises = db.then((db) => db.getAll('exercises'));
 
-    function translate(point: [number, number]) {
-        return `${lerp(x, x + w, point[0])},${lerp(y + h, y, point[1])}`;
+    interface Point {
+        x: number;
+        y: number;
+    }
+    let dataDaily: Point[] = [];
+    async function updateData() {
+        const now = Date.now();
+        let raw: Point[] = (
+            await (await db).getAllFromIndex(
+                'sets',
+                'date',
+                IDBKeyRange.bound(compressDate(now - 1000 * 3600 * 730 * 3), compressDate(now))
+            )
+        )
+            .filter((set) => set.exercise_id == $analyticsExercise.value)
+            .map((set) => {
+                let y = set.repititions > 1 ? set.weight * (1 + set.repititions / 30) : set.weight;
+                let x = round(decompressDate(set.date).getTime(), 1000 * 3600 * 24 * 3);
+                return { x, y };
+            });
+
+        let combinedDaily = groupBy(raw, (point) => point.x.toString());
+        dataDaily = Object.entries(combinedDaily).map(([x, points]) => {
+            let y = Math.max(...points.map((point) => point.y));
+            return { x: parseInt(x), y };
+        });
     }
 
-    (async () => {
-        let records = (await (await db).getAll('sets'))
-            .filter((set) => set.exercise_id == 0)
-            .map((set) =>
-                set.repititions > 1 ? set.weight * (1 + set.repititions / 30) : set.weight
-            );
-        let nth = 3;
-        records = records.reduce(function (r, a, i) {
-            var ii = Math.floor(i / nth);
-            // @ts-ignore
-            r[ii] = ((r[ii] || 0) + a) / (i % nth !== nth - 1 || nth);
-            return r;
-        }, []);
-        const min = Math.min(...records);
-        const max = Math.max(...records);
-        const data = records.map((record, i): [number, number] => [
-            i / records.length,
-            map(record, min, max, 0, 1),
-        ]);
+    let exerciseList: DataListItem[] = [];
+    $: exercises.then(
+        (exercises) =>
+            (exerciseList = exercises
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((exercise) => ({
+                    text: exercise.name,
+                    value: exercise.id,
+                })))
+    );
 
-        for (let i = 0; i < data.length; i++) {
-            path += ` ${translate(data[i])}`;
-        }
-    })();
-
-    let path = '';
+    $: if ($analyticsExercise) {
+        updateData();
+    } else {
+        dataDaily = [];
+    }
 </script>
 
 <style lang="scss">
-    @use "../styles/colors.scss";
-    svg {
+    @use '../styles/colors.scss';
+    .chart {
         background: #fff;
-        border-radius: 3px;
         border: 1px solid colors.$border;
+        border-radius: 3px;
+        padding: 0.5em;
     }
-    .crisp {
-        shape-rendering: crispedges;
-        vector-effect: non-scaling-stroke;
-        stroke: #000;
-        fill: none;
-    }
-    .line {
-        vector-effect: non-scaling-stroke;
-        stroke: #f00;
-        fill: none;
+    .title {
+        margin-bottom: 0.5em;
+        font-weight: bold;
     }
 </style>
 
-<svg viewBox={`0 0 ${width} ${height}`}>
-    <path class="crisp" d={`M${x} ${y}V${y + h}H${x + w}`} />
-    <polyline class="line" points={path} />
-</svg>
+<section>
+    <div class="label">Exercise</div>
+    <DataList bind:selectedItem={$analyticsExercise} bind:items={exerciseList} type="exercise" />
+</section>
+
+<section>
+    <div class="chart">
+        <div class="title">Estimated strength last 3 months</div>
+        <LineChart
+            bind:data={dataDaily}
+            xFunction={dateString}
+            yFunction={roundDecimal}
+            xAxis="Date"
+            yAxis="Est. strength (kg)" />
+    </div>
+</section>
