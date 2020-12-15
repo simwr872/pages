@@ -18,7 +18,7 @@ interface Exercise {
 }
 
 const DAYS = 90;
-const REPS = [8, 6, 4];
+const REPS = [4, 6, 8];
 const now = Date.now();
 const exercises: Exercise[] = [
     { id: randomID(), name: 'Bench press', start: 85, end: 90 },

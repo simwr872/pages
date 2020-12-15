@@ -1,18 +1,29 @@
 <script lang="ts">
-    import { date, exercise, weightIndex, repititionIndex } from '../scripts/stores';
-    import { roundWeight, compressDate, randomID } from '../scripts/helper';
-    import db from '../scripts/database';
+    import {
+        date,
+        exercise,
+        weightIndex,
+        repititionIndex,
+    } from "../scripts/stores";
+    import {
+        roundWeight,
+        compressDate,
+        randomID,
+        oneRepMax,
+        roundDecimal,
+    } from "../scripts/helper";
+    import db from "../scripts/database";
 
-    import DataList from './DataList.svelte';
-    import ReorderableList from './ReorderableList.svelte';
-    import Spinner from './Spinner.svelte';
-    import Table from './Table.svelte';
+    import DataList from "./DataList.svelte";
+    import ReorderableList from "./ReorderableList.svelte";
+    import Spinner from "./Spinner.svelte";
+    import Table from "./Table.svelte";
 
-    import type { Column } from './Spinner.svelte';
-    import type { Item as DataListItem } from './DataList.svelte';
-    import type { Item as ReorderableListItem } from './ReorderableList.svelte';
+    import type { Column } from "./Spinner.svelte";
+    import type { Item as DataListItem } from "./DataList.svelte";
+    import type { Item as ReorderableListItem } from "./ReorderableList.svelte";
 
-    let exercises = db.then((db) => db.getAll('exercises'));
+    let exercises = db.then((db) => db.getAll("exercises"));
 
     let spinnerTitle: string;
 
@@ -32,12 +43,19 @@
     async function fetchSets() {
         if ($date) {
             const arr = await exercises;
-            let sets = await (await db).getAllFromIndex('sets', 'date', compressDate($date));
+            let sets = await (await db).getAllFromIndex(
+                "sets",
+                "date",
+                compressDate($date)
+            );
             sets.sort((a, b) => a.position - b.position);
             setList = sets.map((set) => ({
                 id: set.id,
-                title: arr.find((exercise) => exercise.id == set.exercise_id).name,
-                body: `${set.repititions}x${set.weight} kg`,
+                title: arr.find((exercise) => exercise.id == set.exercise_id)
+                    .name,
+                body: `${set.repititions}x${set.weight} kg (${roundDecimal(
+                    oneRepMax(set.repititions, set.weight)
+                )} kg)`,
                 value: set,
             }));
         } else {
@@ -57,15 +75,15 @@
     );
 
     async function createExercise(name: string): Promise<DataListItem> {
-        let id = await (await db).put('exercises', { id: randomID(), name });
-        exercises = (await db).getAll('exercises');
+        let id = await (await db).put("exercises", { id: randomID(), name });
+        exercises = (await db).getAll("exercises");
         return { text: name, value: id };
     }
 
     let setList: ReorderableListItem[] = [];
 
     async function onListReorder() {
-        const tx = (await db).transaction('sets', 'readwrite');
+        const tx = (await db).transaction("sets", "readwrite");
         await Promise.all(
             setList.map((set, index) => {
                 set.value.position = index;
@@ -100,9 +118,13 @@
         reps.push({ value: i, text: i.toString() });
     }
 
-    const repColumn: Column = { text: 'Repititions', items: reps, selectedIndex: $repititionIndex };
+    const repColumn: Column = {
+        text: "Repititions",
+        items: reps,
+        selectedIndex: $repititionIndex,
+    };
     const weightColumn: Column = {
-        text: 'Weight (kg)',
+        text: "Weight (kg)",
         items: weights,
         selectedIndex: $weightIndex,
     };
@@ -116,7 +138,7 @@
     async function onSpinnerConfirm() {
         $repititionIndex = repColumn.selectedIndex;
         $weightIndex = weightColumn.selectedIndex;
-        await (await db).add('sets', {
+        await (await db).add("sets", {
             id: randomID(),
             date: compressDate($date),
             exercise_id: $exercise.value,
@@ -128,7 +150,7 @@
     }
 
     async function deleteSet(id: number) {
-        await (await db).delete('sets', [id, compressDate($date)]);
+        await (await db).delete("sets", [id, compressDate($date)]);
         setsChanged();
     }
 
@@ -144,7 +166,7 @@
     function populateEstimatedStrengthRows(oneRepMax: number = null) {
         estimatedStrengthRows = [1, 5, 8, 12].map((reps) => {
             if (oneRepMax == null) {
-                return [reps, '-'];
+                return [reps, "-"];
             } else if (reps == 1) {
                 return [reps, roundWeight(oneRepMax)];
             } else {
@@ -158,14 +180,19 @@
             const now = Date.now();
             const records = (
                 await (await db).getAllFromIndex(
-                    'sets',
-                    'date',
-                    IDBKeyRange.bound(compressDate(now - 3600 * 24 * 30 * 1000), compressDate(now))
+                    "sets",
+                    "date",
+                    IDBKeyRange.bound(
+                        compressDate(now - 1000 * 3600 * 730 * 3),
+                        compressDate(now)
+                    )
                 )
             )
                 .filter((set) => set.exercise_id == $exercise.value)
                 .map((set) =>
-                    set.repititions > 1 ? set.weight * (1 + set.repititions / 30) : set.weight
+                    set.repititions > 1
+                        ? set.weight * (1 + set.repititions / 30)
+                        : set.weight
                 );
             if (records.length) {
                 return populateEstimatedStrengthRows(Math.max(...records));
@@ -192,7 +219,11 @@
 
 <section>
     <div class="label">Date</div>
-    <input class:error={isDateError} type="date" placeholder="Select date" bind:value={$date} />
+    <input
+        class:error={isDateError}
+        type="date"
+        placeholder="Select date"
+        bind:value={$date} />
 </section>
 
 <section>
@@ -207,10 +238,14 @@
 
 <section>
     <div class="label">Estimated strength</div>
-    <Table rows={estimatedStrengthRows} headings={['Repititions', 'Weight (kg)']} />
+    <Table
+        rows={estimatedStrengthRows}
+        headings={['Repititions', 'Weight (kg)']} />
 </section>
 
-<section><button class="primary" style="width: 100%;" on:click={addSet}>Add set</button></section>
+<section>
+    <button class="primary" style="width: 100%;" on:click={addSet}>Add set</button>
+</section>
 
 <section>
     <div class="label">Sets</div>

@@ -3,17 +3,18 @@
         roundDecimal,
         groupBy,
         decompressDate,
-        dateString,
         compressDate,
         round,
-    } from '../scripts/helper';
-    import db from '../scripts/database';
-    import LineChart from './LineChart.svelte';
-    import DataList from './DataList.svelte';
-    import type { Item as DataListItem } from './DataList.svelte';
-    import { analyticsExercise } from '../scripts/stores';
+        shortDateString,
+        oneRepMax,
+    } from "../scripts/helper";
+    import db from "../scripts/database";
+    import LineChart from "./LineChart.svelte";
+    import DataList from "./DataList.svelte";
+    import type { Item as DataListItem } from "./DataList.svelte";
+    import { analyticsExercise } from "../scripts/stores";
 
-    let exercises = db.then((db) => db.getAll('exercises'));
+    let exercises = db.then((db) => db.getAll("exercises"));
 
     interface Point {
         x: number;
@@ -24,15 +25,21 @@
         const now = Date.now();
         let raw: Point[] = (
             await (await db).getAllFromIndex(
-                'sets',
-                'date',
-                IDBKeyRange.bound(compressDate(now - 1000 * 3600 * 730 * 3), compressDate(now))
+                "sets",
+                "date",
+                IDBKeyRange.bound(
+                    compressDate(now - 1000 * 3600 * 730 * 3),
+                    compressDate(now)
+                )
             )
         )
             .filter((set) => set.exercise_id == $analyticsExercise.value)
             .map((set) => {
-                let y = set.repititions > 1 ? set.weight * (1 + set.repititions / 30) : set.weight;
-                let x = round(decompressDate(set.date).getTime(), 1000 * 3600 * 24 * 3);
+                let y = oneRepMax(set.repititions, set.weight);
+                let x = round(
+                    decompressDate(set.date).getTime(),
+                    1000 * 3600 * 24 * 3
+                );
                 return { x, y };
             });
 
@@ -77,7 +84,10 @@
 
 <section>
     <div class="label">Exercise</div>
-    <DataList bind:selectedItem={$analyticsExercise} bind:items={exerciseList} type="exercise" />
+    <DataList
+        bind:selectedItem={$analyticsExercise}
+        bind:items={exerciseList}
+        type="exercise" />
 </section>
 
 <section>
@@ -85,7 +95,7 @@
         <div class="title">Estimated strength last 3 months</div>
         <LineChart
             bind:data={dataDaily}
-            xFunction={dateString}
+            xFunction={shortDateString}
             yFunction={roundDecimal}
             xAxis="Date"
             yAxis="Est. strength (kg)" />

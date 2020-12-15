@@ -8,10 +8,10 @@
 </script>
 
 <script lang="ts">
-    import { flip } from 'svelte/animate';
-    import { fade } from 'svelte/transition';
-    import { clamp } from '../scripts/helper';
-    import { createEventDispatcher } from 'svelte';
+    import { flip } from "svelte/animate";
+    import { fade } from "svelte/transition";
+    import { clamp } from "../scripts/helper";
+    import { createEventDispatcher } from "svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -34,7 +34,8 @@
 
     function calculateY(y: number) {
         let itemsRect = itemsElement.getBoundingClientRect();
-        grabbedY = clamp(0, y - itemsRect.top, itemsRect.height) - grabbedOffset;
+        grabbedY =
+            clamp(0, y - itemsRect.top, itemsRect.height) - grabbedOffset;
     }
 
     function drag(y: number) {
@@ -52,7 +53,7 @@
 
     function drop() {
         grabbedId = null;
-        dispatch('reorder');
+        dispatch("reorder");
     }
 
     function grab(y: number, id: number) {
@@ -163,10 +164,15 @@
     }
 </style>
 
-<svelte:window on:mousemove={(event) => drag(event.clientY)} on:mouseup={drop} />
+<svelte:window
+    on:mousemove={(event) => drag(event.clientY)}
+    on:mouseup={drop} />
 <ol class="items" bind:this={itemsElement}>
     {#if grabbedId != null}
-        <li class="item grabbed" style="top: {grabbedY}px" out:fade={{ duration: 100 }}>
+        <li
+            class="item grabbed"
+            style="top: {grabbedY}px"
+            out:fade={{ duration: 100 }}>
             {@html grabbedHTML}
         </li>
     {/if}
@@ -175,10 +181,10 @@
     {/if}
     {#each items as item, index (item.id)}
         <li
-            animate:flip|local={{ duration: 100 }}
-            transition:fade|local={{duration: 100}}
+            animate:flip={{ duration: 100 }}
+            transition:fade|local={{ duration: 100 }}
             class="item"
-            class:boundary={index && items[index-1].title != item.title}
+            class:boundary={index && items[index - 1].title != item.title}
             class:ghost={grabbedId == item.id}
             data-id={item.id}>
             <div>
@@ -195,7 +201,9 @@
                     on:touchmove={(event) => drag(event.touches[0].clientY)}
                     on:touchend={drop}
                     on:touchcancel={drop}>&dots;</span>
-                <div class="text"><b>{item.title}</b><span>{item.body}</span></div>
+                <div class="text">
+                    <b>{item.title}</b><span>{item.body}</span>
+                </div>
             </div>
             <button class="delete" on:click={() => onDelete(item.id)}>✕</button>
         </li>

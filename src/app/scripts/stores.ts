@@ -11,5 +11,4 @@ export const exercise = writable<DataListItem>(null);
 export const weightIndex = writable(0);
 export const repititionIndex = writable(0);
 
-
 export const analyticsExercise = writable<DataListItem>(null);

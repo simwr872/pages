@@ -7,11 +7,11 @@
 </script>
 
 <script lang="ts">
-    import { slide } from 'svelte/transition';
-    import SpinnerColumn from './SpinnerColumn.svelte';
-    import type { Item as ColumnItem } from './SpinnerColumn.svelte';
-    import { createEventDispatcher } from 'svelte';
-    import Overlay from './Overlay.svelte';
+    import { slide } from "svelte/transition";
+    import SpinnerColumn from "./SpinnerColumn.svelte";
+    import type { Item as ColumnItem } from "./SpinnerColumn.svelte";
+    import { createEventDispatcher } from "svelte";
+    import Overlay from "./Overlay.svelte";
 
     export let title: string;
     export let isVisible = false;
@@ -21,7 +21,7 @@
 
     function handleConfirm() {
         isVisible = false;
-        dispatch('confirm');
+        dispatch("confirm");
     }
 </script>
 
@@ -57,9 +57,13 @@
     <div class="g-container-small" transition:slide={{ duration: 100 }}>
         <div class="content">
             <div class="header">
-                <button class="gray" on:click={() => (isVisible = false)}>Cancel</button>
+                <button
+                    class="gray"
+                    on:click={() => (isVisible = false)}>Cancel</button>
                 <span>{title}</span>
-                <button class="primary" on:click={handleConfirm}>Confirm</button>
+                <button
+                    class="primary"
+                    on:click={handleConfirm}>Confirm</button>
             </div>
             <div class="body">
                 {#each columns as column}

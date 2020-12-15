@@ -72,28 +72,27 @@ export function map(x: number, in_min: number, in_max: number, out_min: number, 
 }
 
 /**
- * Returns a bit representation of a day date. Size is unbounded but for the near future this is 14
- * bits.
+ * Returns the "%y%m%d" date representation as a number.
  * @param input Input for Date function.
  */
 export function compressDate(input: string | number | Date) {
     let date = new Date(input);
-    return ((date.getFullYear() - 2000) << 9) | (date.getMonth() << 5) | date.getDate();
+    return (date.getFullYear() % 100) * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
 }
 
 /**
- * Returns the Date representation of a previously compressed date.
+ * Returns the Date representation of a previously compressed "%y%m%d" date number.
  * @param date Day date bit representation.
  */
 export function decompressDate(date: number) {
-    let day = date & 0b11111;
-    let month = (date >> 5) & 0b1111;
-    let year = (date >> 9) + 2000;
-    return new Date(year, month, day);
+    let day = date % 100;
+    let month = ((date - day) % 10000) / 100;
+    let year = (date - month * 100 - day) / 10000;
+    return new Date(2000 + year, month - 1, day);
 }
 
 /**
- * Returns the YYYY-MM-DD date representation.
+ * Returns the "%Y-%m-%d" date representation.
  * @param input Input for Date function.
  */
 export function dateString(input: string | number | Date) {
@@ -102,4 +101,23 @@ export function dateString(input: string | number | Date) {
     let month = `0${date.getMonth() + 1}`.slice(-2);
     let day = `0${date.getDate()}`.slice(-2);
     return `${year}-${month}-${day}`;
+}
+
+/**
+ * Returns the "%b %-d" date representation.
+ * @param input Input for Date function.
+ */
+export function shortDateString(input: string | number | Date) {
+    let date = new Date(input);
+    let day = `0${date.getDate()}`.slice(-2);
+    let month = date.toLocaleString('en', { month: 'short' });
+    return `${month} ${day}`;
+}
+
+export function oneRepMax(repititions: number, weight: number) {
+    if (repititions > 1) {
+        return weight * (1 + repititions / 30);
+    } else {
+        return weight;
+    }
 }

@@ -1,14 +1,14 @@
 <script lang="ts">
-    import Analytics from './Analytics.svelte';
-    import Settings from './Settings.svelte';
-    import Workout from './Workout.svelte';
-    import { onMount } from 'svelte';
+    import Analytics from "./Analytics.svelte";
+    import Settings from "./Settings.svelte";
+    import Workout from "./Workout.svelte";
+    import { onMount } from "svelte";
 
     onMount(() => {
         try {
-            navigator.serviceWorker.register('./worker.js');
+            navigator.serviceWorker.register("./worker.js");
         } catch {
-            console.log('NO');
+            console.log("NO");
         }
     });
     const pages = {
@@ -16,7 +16,7 @@
         Workout: Workout,
         Settings: Settings,
     };
-    let currentPage = 'Analytics';
+    let currentPage = "Analytics";
 </script>
 
 <style lang="scss">

@@ -6,7 +6,7 @@
 </script>
 
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount } from "svelte";
     export let items: Item[] = [];
     export let selectedIndex: number = 0;
     export let name: string;
@@ -39,7 +39,7 @@
         if (smooth) {
             element.scroll({
                 top: offset,
-                behavior: 'smooth',
+                behavior: "smooth",
             });
         } else {
             element.scrollTop = offset;
@@ -54,7 +54,7 @@
     @use '../styles/colors.scss';
     $items: 7;
     $itemheight: 44px;
-    $height: calc(100vh - #{$itemheight*2});
+    $height: calc(100vh - #{$itemheight * 2});
     $max-height: $itemheight * $items;
     $breakpoint: $itemheight * ($items + 2);
     .column {
@@ -105,7 +105,7 @@
     }
     .filler {
         max-height: $itemheight * ($items - 1)/2;
-        height: calc((#{$height} - #{$itemheight})/2);
+        height: calc((#{$height} - #{$itemheight}) / 2);
     }
     .name {
         margin-top: 5px;

@@ -1,5 +1,5 @@
 <script type="ts">
-    import { map, lerp } from '../scripts/helper';
+    import { map, lerp } from "../scripts/helper";
 
     interface Range {
         min: number;
@@ -14,7 +14,7 @@
     export let height = 400;
     export let padding = 16 * 0.75;
     export let horizontalLines = 4;
-    export let verticalLines = 1;
+    export let verticalLines = 3;
     export let data: Point[] = [];
     export let xFunction = (value: number): any => value;
     export let yFunction = (value: number): any => value;
@@ -29,11 +29,11 @@
     const yRange = { min: y + h, max: y };
 
     const axis = `M0 ${y + h}H${width}M${x} ${height}V0`;
-    let hLines = '';
+    let hLines = "";
     for (let i = 0; i < horizontalLines; i++) {
         hLines += `M0 ${y + (i * h) / horizontalLines}H${width}`;
     }
-    let vLines = '';
+    let vLines = "";
     for (let i = 0; i < verticalLines; i++) {
         vLines += `M${x + w - (i * w) / verticalLines} ${height}V0`;
     }
@@ -46,15 +46,29 @@
         xRange: Range,
         yRange: Range
     ): Point {
-        const x = map(point.x, xOldRange.min, xOldRange.max, xRange.min, xRange.max);
-        const y = map(point.y, yOldRange.min, yOldRange.max, yRange.min, yRange.max);
+        const x = map(
+            point.x,
+            xOldRange.min,
+            xOldRange.max,
+            xRange.min,
+            xRange.max
+        );
+        const y = map(
+            point.y,
+            yOldRange.min,
+            yOldRange.max,
+            yRange.min,
+            yRange.max
+        );
         return { x, y };
     }
 
     function cosineBezier(from: Point, to: Point) {
         let K = (Math.PI - 2) / Math.PI;
         let diff = K * (to.x - from.x);
-        return `C${from.x + diff} ${from.y} ${to.x - diff} ${to.y} ${to.x} ${to.y}`;
+        return `C${from.x + diff} ${from.y} ${to.x - diff} ${to.y} ${to.x} ${
+            to.y
+        }`;
     }
 
     let path: string;
@@ -71,14 +85,17 @@
                     return `M${point.x} ${point.y}`;
                 }
             })
-            .join(' ');
+            .join(" ");
     } else {
-        path = '';
+        path = "";
     }
     function computePoints(data: Point[]) {
         if (data.length) {
             data.sort((a, b) => a.x - b.x);
-            let xOldRange: Range = { min: data[0].x, max: data[data.length - 1].x };
+            let xOldRange: Range = {
+                min: data[0].x,
+                max: data[data.length - 1].x,
+            };
             let y = data.map((point) => point.y);
             let yOldRange: Range = { min: Math.min(...y), max: Math.max(...y) };
             points = data.map((point) =>
@@ -86,13 +103,21 @@
             );
             let steps = [xFunction(xOldRange.min)];
             for (let i = 1; i < verticalLines; i++) {
-                steps.push(xFunction(lerp(xOldRange.min, xOldRange.max, i / verticalLines)));
+                steps.push(
+                    xFunction(
+                        lerp(xOldRange.min, xOldRange.max, i / verticalLines)
+                    )
+                );
             }
             steps.push(xFunction(xOldRange.max));
             xTicks = steps;
             steps = [yFunction(yOldRange.min)];
             for (let i = 1; i < horizontalLines; i++) {
-                steps.push(yFunction(lerp(yOldRange.min, yOldRange.max, i / horizontalLines)));
+                steps.push(
+                    yFunction(
+                        lerp(yOldRange.min, yOldRange.max, i / horizontalLines)
+                    )
+                );
             }
             steps.push(yFunction(yOldRange.max));
             yTicks = steps.reverse();
@@ -111,9 +136,9 @@
         grid-template-columns: auto auto 1fr;
         grid-template-rows: 1fr auto auto;
         grid-template-areas:
-            'y ya g'
-            '_ _ xa'
-            '_ _ x';
+            "y ya g"
+            "_ _ xa"
+            "_ _ x";
     }
     .grid {
         stroke: #999;

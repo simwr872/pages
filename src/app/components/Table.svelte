@@ -1,6 +1,6 @@
 <script lang="ts">
     export let headings: string[] = [];
-    export let rows: [any,any][] = [];
+    export let rows: [any, any][] = [];
 </script>
 
 <style lang="scss">
@@ -14,7 +14,8 @@
         padding: 1em;
         border-spacing: 0;
     }
-    th, td {
+    th,
+    td {
         padding: 0.25em 0.5em;
         text-align: left;
         &:last-of-type {
