@@ -40,19 +40,19 @@ build/%.font.js: build/%.js build/font.json
 	--input build/${*}.js \
 	--output $(@)
 
-public/icons%woff2 build/font%json: $(wildcard src/app/icons/*.svg)
+public/icons%woff2 build/font%json: $(wildcard src/icons/*.svg)
 	node scripts/iconFont.js \
-	--input $(wildcard src/app/icons/*.svg) \
+	--input $(wildcard src/icons/*.svg) \
 	--output public/icons.woff2 \
 	--info build/font.json
 
 build/bundle.j% build/bundle.cs%: \
-src/app/main.ts \
-$(wildcard src/app/components/*) \
-$(wildcard src/app/scripts/*)
+src/main.ts \
+$(wildcard src/components/*) \
+$(wildcard src/scripts/*)
 	node scripts/app.js \
 	--output build \
-	--input src/app/main.ts
+	--input src/main.ts
 
 clean:
 	rm -rf build public
@@ -94,5 +94,5 @@ public/index.html: src/static/index.html
 public/style.css: build/global.css build/bundle.css
 	node scripts/minifyStyle.js --output public --name style --styles $(^)
 
-build/global.css: $(wildcard src/app/styles/*)
-	$(BIN)/sass --no-source-map src/app/styles/global.scss $(@)
+build/global.css: $(wildcard src/styles/*)
+	$(BIN)/sass --no-source-map src/styles/global.scss $(@)

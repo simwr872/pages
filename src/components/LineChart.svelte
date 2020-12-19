@@ -162,6 +162,7 @@
         stroke: #fff;
     }
     .g {
+        width: 100%;
         grid-area: g;
     }
     .y {

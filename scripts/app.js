@@ -61,7 +61,7 @@ const opts = program
             nodeResolve({ browser: true, dedupe: ['svelte'] }),
             commonjs({ sourceMap: false }),
             typescript({
-                tsconfig: `src/app/tsconfig.json`,
+                tsconfig: `src/tsconfig.json`,
             }),
         ],
     });
